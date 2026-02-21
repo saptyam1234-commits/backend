@@ -13,11 +13,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Plan middleware
-app.use(checkPlan);
 
 // Routes
-app.use('/api/chat', chatRoutes);
+app.use('/api/chat', checkPlan, chatRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/scan', scanRoutes);
 app.use('/api/widget', widgetRoutes);
