@@ -1,10 +1,9 @@
 function getWidgetSnippet() {
     return `
-<script>
-  (function(){
+(function(){
     console.log("AI Widget Loaded!");
-  })();
-</script>`;
+})();
+`;
 }
 
 module.exports = { getWidgetSnippet };
