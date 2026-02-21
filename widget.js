@@ -1,6 +1,6 @@
 (function () {
 
-  const API_BASE = "https://backend-cyvm.onrender.com";
+   const API_BASE = "https://backend-cyvm.onrender.com/api/widget";
 
   /* ---------- CHAT BUTTON ---------- */
   const btn = document.createElement("button");
