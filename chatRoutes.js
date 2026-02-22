@@ -1,14 +1,37 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getChatResponse } = require('./openAI.service');
+const { getChatResponse } = require("./openAI.service");
 
-router.post('/', async (req, res) => {
-    const { message } = req.body;
+router.post("/", async (req, res) => {
+
     try {
-        const response = await getChatResponse(message);
-        res.json({ reply: response });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+
+        const { message } = req.body;
+
+        // ✅ Check message
+        if (!message || message.trim() === "") {
+            return res.status(400).json({
+                reply: "Message is required."
+            });
+        }
+
+        console.log("📩 Incoming Message:", message);
+
+        const aiReply = await getChatResponse(message);
+
+        console.log("🤖 AI Reply:", aiReply);
+
+        return res.status(200).json({
+            reply: aiReply
+        });
+
+    } catch (error) {
+
+        console.error("🔥 Chat Route Error:", error);
+
+        return res.status(500).json({
+            reply: "Server error occurred."
+        });
     }
 });
 
