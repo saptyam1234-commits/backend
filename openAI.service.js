@@ -49,7 +49,7 @@ async function getChatResponse(message) {
             console.error("Data:", error.response.data);
         }
 
-        return "AI response unavailable.";
+        return "Namaste 🙏 Aapka message receive ho gaya hai. Hamari team jald reply karegi.";
     }
 }
 
