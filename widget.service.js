@@ -90,9 +90,9 @@ if(e.key==="Enter" && input.value.trim()!==""){
 const userMessage = input.value;
 input.value="";
 
-messages.innerHTML += `<div style="text-align:right;margin:5px">
-You: ${userMessage}
-</div>`;
+messages.innerHTML += '<div style="text-align:right;margin:5px">' +
+'You: ' + userMessage +
+'</div>';
 
 try{
 
