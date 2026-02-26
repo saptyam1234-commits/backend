@@ -1,10 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const admin = require("./firebase");
+
+const db = require("./firebase");
 const { getWidgetSnippet } = require("./widget.service");
 
 /*
+================================
 Generate Widget Snippet
+================================
 */
 
 router.post("/generate", async (req,res)=>{
@@ -19,8 +22,6 @@ success:false,
 message:"API key missing"
 });
 }
-
-const db = require("./firebase");
 
 const snippet = getWidgetSnippet(apiKey,{
 businessId: businessId || ""
@@ -53,8 +54,11 @@ message:"Widget generation failed"
 
 });
 
+
 /*
+================================
 Serve Widget Script
+================================
 */
 
 router.get("/", async (req,res)=>{
@@ -66,8 +70,6 @@ const apiKey = req.query.key;
 if(!apiKey){
 return res.status(400).send("API key missing");
 }
-
-const db = require("./firebase");
 
 const snap = await db.collection("widgets")
 .doc(apiKey)
