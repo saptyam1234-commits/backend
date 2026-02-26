@@ -5,5 +5,3 @@ if (!admin.apps.length) {
     credential: admin.credential.applicationDefault()
   });
 }
-
-module.exports = admin;
