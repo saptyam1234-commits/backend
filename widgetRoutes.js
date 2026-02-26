@@ -1,12 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const admin = require("firebase-admin");
+const admin = require("./firebase");
 const { getWidgetSnippet } = require("./widget.service");
 
 /*
-====================================
 Generate Widget Snippet
-====================================
 */
 
 router.post("/generate", async (req,res)=>{
@@ -24,13 +22,9 @@ message:"API key missing"
 
 const db = admin.firestore();
 
-/* Directly allow generate without website lookup */
-
 const snippet = getWidgetSnippet(apiKey,{
 businessId: businessId || ""
 });
-
-/* Save widget snippet */
 
 await db.collection("widgets").doc(apiKey).set({
 apiKey,
@@ -60,9 +54,7 @@ message:"Widget generation failed"
 });
 
 /*
-====================================
 Serve Widget Script
-====================================
 */
 
 router.get("/", async (req,res)=>{
@@ -88,13 +80,11 @@ return res.status(403).send("Invalid API key");
 const widgetData = snap.data();
 
 res.setHeader("Content-Type","application/javascript");
-
 res.send(widgetData.snippetCode);
 
 }catch(err){
 
 console.error(err);
-
 res.status(500).send("Widget error");
 
 }
