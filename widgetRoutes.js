@@ -20,7 +20,7 @@ message:"API key missing"
 });
 }
 
-const db = admin.firestore();
+const db = require("./firebase");
 
 const snippet = getWidgetSnippet(apiKey,{
 businessId: businessId || ""
@@ -67,7 +67,7 @@ if(!apiKey){
 return res.status(400).send("API key missing");
 }
 
-const db = admin.firestore();
+const db = require("./firebase");
 
 const snap = await db.collection("widgets")
 .doc(apiKey)
