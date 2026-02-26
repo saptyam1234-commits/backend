@@ -110,9 +110,9 @@ businessId:BUSINESS_ID
 
 const data = await res.json();
 
-messages.innerHTML += `<div style="margin:5px">
-Bot: ${data.reply || "No response"}
-</div>`;
+messages.innerHTML += '<div style="margin:5px">' +
+'Bot: ' + (data.reply || "No response") +
+'</div>';
 
 messages.scrollTop = messages.scrollHeight;
 
