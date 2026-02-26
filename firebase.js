@@ -5,3 +5,7 @@ if (!admin.apps.length) {
     credential: admin.credential.applicationDefault()
   });
 }
+
+const db = admin.firestore();
+
+module.exports = db;
