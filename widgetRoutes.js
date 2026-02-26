@@ -5,7 +5,7 @@ const { getWidgetSnippet } = require("./widget.service");
 
 /*
 ====================================
-Generate Widget Snippet (Dashboard Button)
+Generate Widget Snippet
 ====================================
 */
 
@@ -16,40 +16,30 @@ try{
 const { apiKey, businessId, domain } = req.body;
 
 if(!apiKey){
-return res.status(400).json({message:"API key missing"});
+return res.status(400).json({
+success:false,
+message:"API key missing"
+});
 }
-
-/* Check Website Exists */
 
 const db = admin.firestore();
 
-const snap = await db.collection("websites")
-.where("apiKey","==",apiKey)
-.limit(1)
-.get();
+/* Directly allow generate without website lookup */
 
-if(snap.empty){
-return res.status(403).json({message:"Invalid API key"});
-}
+const snippet = getWidgetSnippet(apiKey,{
+businessId: businessId || ""
+});
 
-const websiteData = snap.docs[0].data();
-
-/* Create Snippet */
-
-const snippet = getWidgetSnippet(apiKey, websiteData);
-
-/* Save Snippet in Firebase */
+/* Save widget snippet */
 
 await db.collection("widgets").doc(apiKey).set({
-businessId,
 apiKey,
-domain,
+businessId: businessId || "",
+domain: domain || "",
 snippetCode: snippet,
 status:"active",
 createdAt:new Date()
 });
-
-/* Return snippet */
 
 res.json({
 success:true,
@@ -57,18 +47,21 @@ snippet
 });
 
 }catch(err){
-console.error(err);
+
+console.error("Widget Generate Error:",err);
+
 res.status(500).json({
 success:false,
-message:err.message
+message:"Widget generation failed"
 });
+
 }
 
 });
 
 /*
 ====================================
-Serve Widget Script (Website Side)
+Serve Widget Script
 ====================================
 */
 
@@ -99,8 +92,11 @@ res.setHeader("Content-Type","application/javascript");
 res.send(widgetData.snippetCode);
 
 }catch(err){
+
 console.error(err);
+
 res.status(500).send("Widget error");
+
 }
 
 });
