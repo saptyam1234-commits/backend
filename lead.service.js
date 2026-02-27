@@ -1,18 +1,17 @@
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
-if (!process.env.FIREBASE_PRIVATE_KEY) {
-    throw new Error("FIREBASE_PRIVATE_KEY is missing in environment variables");
+if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT missing");
 }
 
-const serviceAccount = {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-};
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 initializeApp({
-    credential: cert(serviceAccount)
+    credential: cert({
+        ...serviceAccount,
+        private_key: serviceAccount.private_key.replace(/\\n/g, '\n'),
+    }),
 });
 
 const db = getFirestore();
@@ -24,3 +23,4 @@ async function saveLead(data) {
 }
 
 module.exports = { saveLead };
+
