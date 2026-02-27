@@ -24,3 +24,4 @@ if (!admin.apps.length) {
 }
 
 const db = admin.firestore();
+module.exports = db; 
