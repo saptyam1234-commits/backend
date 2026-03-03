@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { getChatResponse } = require("./openAI.service");
+const checkPlan = require("./checkPlan"); // ✅ ADD THIS
 
-router.post("/", async (req, res) => {
+router.post("/", checkPlan, async (req, res) => {  // ✅ ADD MIDDLEWARE
 
     try {
 
