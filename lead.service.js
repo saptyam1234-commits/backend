@@ -1,20 +1,23 @@
-const { initializeApp, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
+
+const admin = require("firebase-admin");
 
 if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
     throw new Error("FIREBASE_SERVICE_ACCOUNT missing");
 }
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-if (!getApps().length) {
-initializeApp({
-    credential: cert({
-        ...serviceAccount,
-        private_key: serviceAccount.private_key.replace(/\\n/g, '\n'),
-    }),
-});
+
+// ✅ Prevent duplicate initialization (Universal Method)
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert({
+            ...serviceAccount,
+            private_key: serviceAccount.private_key.replace(/\\n/g, '\n'),
+        }),
+    });
 }
-const db = getFirestore();
+
+const db = admin.firestore();
 
 async function saveLead(data) {
     const ref = db.collection('leads').doc();
@@ -23,4 +26,3 @@ async function saveLead(data) {
 }
 
 module.exports = { saveLead };
-
