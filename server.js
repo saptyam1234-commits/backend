@@ -13,6 +13,57 @@ const widgetRoutes = require('./widgetRoutes');
 const app = express();
 
 app.use(cors());
+app.post("/stripe-webhook-test", async (req, res) => {
+
+  console.log("🔥 Test Webhook Hit");
+
+  try {
+
+    const { businessId, eventType } = req.body;
+
+    if (!businessId || !eventType) {
+      return res.status(400).json({
+        message: "businessId and eventType required"
+      });
+    }
+
+    const db = require("firebase-admin").firestore();
+
+    if (eventType === "payment_success") {
+
+      await db.collection("businesses")
+        .doc(businessId)
+        .update({
+          plan: "pro",
+          expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          status: "active"
+        });
+
+      console.log("✅ Plan upgraded (TEST)");
+
+    }
+
+    if (eventType === "subscription_cancel") {
+
+      await db.collection("businesses")
+        .doc(businessId)
+        .update({
+          plan: "free",
+          status: "cancelled"
+        });
+
+      console.log("⚠ Plan downgraded (TEST)");
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("Webhook Test Error:", err);
+    res.status(500).json({ error: "Test webhook failed" });
+  }
+
+});
+
 app.use(express.json());
 
 // Test route
