@@ -1,27 +1,21 @@
-  const admin = require("firebase-admin");
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 
-if (!admin.apps.length) {
-
-  if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-    throw new Error("FIREBASE_SERVICE_ACCOUNT is missing");
-  }
-
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-
-  if (!serviceAccount.private_key) {
-    throw new Error("Private key is missing in service account");
-  }
-
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: serviceAccount.project_id,
-      clientEmail: serviceAccount.client_email,
-      privateKey: serviceAccount.private_key.replace(/\\n/g, '\n'),
-    }),
-    databaseURL: "https://konrk-88f13.firebaseio.com"
-  });
-
+if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT missing");
 }
 
-const db = admin.firestore();
-module.exports = db; 
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+if (!getApps().length) {
+    initializeApp({
+        credential: cert({
+            ...serviceAccount,
+            private_key: serviceAccount.private_key.replace(/\\n/g, '\n'),
+        }),
+    });
+}
+
+const db = getFirestore();
+
+module.exports = db;
