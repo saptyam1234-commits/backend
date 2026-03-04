@@ -23,5 +23,5 @@ if (!admin.apps.length) {
 
 }
 
-const db = require("./firebase");
+const db = admin.firestore();
 module.exports = db; 
