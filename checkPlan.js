@@ -1,5 +1,4 @@
-const admin = require("./firebase");
-const db = admin.firestore();
+const db = require("./firebase");
 
 module.exports = async function (req, res, next) {
   try {
