@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
+require("./firebase");
 const express = require('express');
 const cors = require('cors');
 
