@@ -15,56 +15,90 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 // ==============================
-// 🔥 TEST WEBHOOK (TEMPORARY)
+// 🔥 REAL WEBHOOK 
 // ==============================
+app.post(
+  "/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
 
-app.post("/stripe-webhook-test", async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
 
-  console.log("🔥 Test Webhook Hit");
-
-  try {
-    const { businessId, eventType } = req.body;
-
-    if (!businessId || !eventType) {
-      return res.status(400).json({
-        message: "businessId and eventType required"
-      });
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.error("Stripe signature error:", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    const admin = require("firebase-admin");
-    const db = admin.firestore();
+    try {
 
-    if (eventType === "payment_success") {
-      await db.collection("businesses")
-        .doc(businessId)
-        .update({
-          plan: "pro",
-          expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          status: "active"
-        });
+      if (event.type === "invoice.payment_succeeded") {
 
-      console.log("✅ Plan upgraded (TEST)");
+        const invoice = event.data.object;
+
+        const businessId = invoice.metadata?.businessId;
+
+        if (!businessId) {
+          console.log("No businessId in metadata");
+          return res.json({ received: true });
+        }
+
+        const priceId = invoice.lines.data[0].price.id;
+
+        let plan = "basic";
+
+        if (priceId === process.env.STRIPE_PRO_PRICE) {
+          plan = "pro";
+        }
+
+        const expiry = invoice.lines.data[0].period.end * 1000;
+
+        await db.collection("businesses")
+          .doc(businessId)
+          .update({
+            plan: plan,
+            expiry: new Date(expiry),
+            isActive: true
+          });
+
+        console.log("Plan activated:", businessId, plan);
+      }
+
+      if (event.type === "customer.subscription.deleted") {
+
+        const subscription = event.data.object;
+
+        const businessId = subscription.metadata?.businessId;
+
+        if (!businessId) {
+          return res.json({ received: true });
+        }
+
+        await db.collection("businesses")
+          .doc(businessId)
+          .update({
+            plan: "free",
+            isActive: false
+          });
+
+        console.log("Subscription cancelled:", businessId);
+      }
+
+      res.json({ received: true });
+
+    } catch (err) {
+      console.error("Webhook processing error:", err);
+      res.status(500).json({ error: "Webhook failed" });
     }
-
-    if (eventType === "subscription_cancel") {
-      await db.collection("businesses")
-        .doc(businessId)
-        .update({
-          plan: "free",
-          status: "cancelled"
-        });
-
-      console.log("⚠ Plan downgraded (TEST)");
-    }
-
-    res.json({ success: true });
-
-  } catch (err) {
-    console.error("Webhook Test Error:", err);
-    res.status(500).json({ error: "Test webhook failed" });
   }
-});
-// Test route
+);
+// REAL route
 app.get('/', (req, res) => {
   res.send("API Running 🚀");
 });
